@@ -35,7 +35,12 @@ jobs:
       - name: Install phylum-js-submit deps
         run: |
           pushd phylum-js-submit || exit 1
-            npm install -g
+            # can't install globally on github runners
+            # need to install then add to path?
+            npm install
+            echo "PWD"
+            pwd
+            export PATH=/github/workspace/phylum-js-submit:$PATH
             echo "[*] installed phylum-js-submit"
           popd
 
@@ -61,12 +66,14 @@ jobs:
       - name: Submit to API
         run: |
           export PATH="$HOME/.phylum:$PATH"
+          export PATH=/github/workspace/phylum-js-submit:$PATH
           ls
           pushd $GITHUB_WORKSPACE || exit 1
             echo 'JOB_ID<<EOF' >> $GITHUB_ENV
-            phylum-js-submit -t package package-lock.json | egrep -o '[0-9a-f-]{36}' >> $GITHUB_ENV
+            phylum-js-submit.js -t package package-lock.json | egrep -o '[0-9a-f-]{36}' >> $GITHUB_ENV
             echo 'EOF' >> $GITHUB_ENV
-            phylum-cli status -i "${{ env.JOB_ID }}"
+            #phylum-cli status -i "${{ env.JOB_ID }}"
+            echo "JOB_ID = ${{ env.JOB_ID }}"
           popd
 
 
