@@ -40,7 +40,8 @@ jobs:
             npm install
             echo "PWD"
             pwd
-            export PATH=/github/workspace/phylum-js-submit:$PATH
+            export PATH=$PWD:$PATH
+            echo $PATH
             echo "[*] installed phylum-js-submit"
           popd
 
