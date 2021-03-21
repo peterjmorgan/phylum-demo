@@ -72,9 +72,14 @@ jobs:
           ls
           pushd $GITHUB_WORKSPACE || exit 1
             phylum-js-submit.js -t package package-lock.json | egrep -o '[0-9a-f-]{36}' >> job_id
-            cat job_id | xargs -I {} phylum-cli status -i {}
+            cat job_id | xargs -I {} phylum-cli status -i {} | tail -n+2 > results.json
             #phylum-cli status -i "${{ env.JOB_ID }}"
           popd
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: results
+          path: $GITHUB_WORKSPACE/results.json
 
 
 
