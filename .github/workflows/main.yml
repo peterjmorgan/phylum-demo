@@ -74,6 +74,8 @@ jobs:
             phylum-js-submit.js -t package package-lock.json | egrep -o '[0-9a-f-]{36}' >> job_id
             cat job_id | xargs -I {} phylum-cli status -i {} | tail -n+2 > results.json
             #phylum-cli status -i "${{ env.JOB_ID }}"
+            echo "PWD = $PWD"
+            ls
           popd
 
       - uses: actions/upload-artifact@v2
