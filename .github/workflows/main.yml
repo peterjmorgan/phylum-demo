@@ -71,12 +71,9 @@ jobs:
           export PATH=/home/runner/work/phylum-demo/phylum-demo/phylum-js-submit:$PATH
           ls
           pushd $GITHUB_WORKSPACE || exit 1
-            echo 'JOB_ID<<EOF' >> $GITHUB_ENV
-            phylum-js-submit.js -t package package-lock.json | egrep -o '[0-9a-f-]{36}' >> $GITHUB_ENV
-            echo 'EOF' >> $GITHUB_ENV
+            phylum-js-submit.js -t package package-lock.json | egrep -o '[0-9a-f-]{36}' >> job_id
+            cat job_id | xargs -I {} phylum-cli status -i {}
             #phylum-cli status -i "${{ env.JOB_ID }}"
-            echo "JOB_ID = ${{ env.JOB_ID }}"
-            echo $GITHUB_ENV
           popd
 
 
