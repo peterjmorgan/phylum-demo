@@ -67,7 +67,8 @@ jobs:
       - name: Submit to API
         run: |
           export PATH="$HOME/.phylum:$PATH"
-          export PATH=/github/workspace/phylum-js-submit:$PATH
+          #export PATH=/github/workspace/phylum-js-submit:$PATH
+          export PATH=/home/runner/work/phylum-demo/phylum-demo/phylum-js-submit:$PATH
           ls
           pushd $GITHUB_WORKSPACE || exit 1
             echo 'JOB_ID<<EOF' >> $GITHUB_ENV
