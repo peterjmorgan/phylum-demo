@@ -40,7 +40,8 @@ jobs:
             npm install
             echo "PWD"
             pwd
-            export PATH=/github/workspace/phylum-js-submit:$PATH
+            export PATH=$PWD:$PATH
+            echo $PATH
             echo "[*] installed phylum-js-submit"
           popd
 
@@ -66,7 +67,8 @@ jobs:
       - name: Submit to API
         run: |
           export PATH="$HOME/.phylum:$PATH"
-          export PATH=/github/workspace/phylum-js-submit:$PATH
+          #export PATH=/github/workspace/phylum-js-submit:$PATH
+          export PATH=/home/runner/work/phylum-demo/phylum-demo/phylum-js-submit:$PATH
           ls
           pushd $GITHUB_WORKSPACE || exit 1
             echo 'JOB_ID<<EOF' >> $GITHUB_ENV
@@ -74,6 +76,7 @@ jobs:
             echo 'EOF' >> $GITHUB_ENV
             #phylum-cli status -i "${{ env.JOB_ID }}"
             echo "JOB_ID = ${{ env.JOB_ID }}"
+            echo $GITHUB_ENV
           popd
 
 
