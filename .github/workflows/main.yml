@@ -35,13 +35,8 @@ jobs:
       - name: Install phylum-js-submit deps
         run: |
           pushd phylum-js-submit || exit 1
-            # can't install globally on github runners
-            # need to install then add to path?
             npm install
-            echo "PWD"
-            pwd
             export PATH=$PWD:$PATH
-            echo $PATH
             echo "[*] installed phylum-js-submit"
           popd
 
@@ -49,33 +44,24 @@ jobs:
         run: |
           unzip phylum-cli-linux-v0.0.4.1-static.zip
           export PATH="$PWD/phylum-cli-linux-v0.0.4-static-installer:$PATH"
-          #cd phylum-cli-linux-v0.0.4-static-installer
           pushd phylum-cli-linux-v0.0.4-static-installer || exit 1
             bash install.sh
           popd
           echo "[*] installed phylum-cli"
-          #phylum-cli -h
-          #sed -i 's/api_token: ~/${{ secrets.PHYLUM_API_TOKEN }}/' ~/.phylum/settings.yaml
-          #echo ${{ secrets.PHYLUM_USER }}
       - name: Configure phylum-cli with credentials
         run: |
           sed -i "s/user:/user: ${{ secrets.PHYLUM_USER }}/" ~/.phylum/settings.yaml
           sed -i "s/pass:/pass: ${{ secrets.PHYLUM_PASS }}/" ~/.phylum/settings.yaml
-          cat ~/.phylum/settings.yaml
           echo "[*] Configured phylum-cli with credentials"
 
       - name: Submit to API
         run: |
           export PATH="$HOME/.phylum:$PATH"
-          #export PATH=/github/workspace/phylum-js-submit:$PATH
           export PATH=/home/runner/work/phylum-demo/phylum-demo/phylum-js-submit:$PATH
           ls
           pushd $GITHUB_WORKSPACE || exit 1
             phylum-js-submit.js -t package package-lock.json | egrep -o '[0-9a-f-]{36}' >> job_id
             cat job_id | xargs -I {} phylum-cli status -i {} | tail -n+2 > ~/results.json
-            #phylum-cli status -i "${{ env.JOB_ID }}"
-            echo "PWD = $PWD"
-            ls
           popd
 
       - uses: actions/upload-artifact@v2
@@ -95,7 +81,6 @@ jobs:
             echo "[*] python: installing requirements.txt"
             pip install -r requirements.txt
           fi
-          cat ~/results.json | wc -l
           python phylum-python-report.py ~/results.json > ~/report.txt
 
       - uses: actions/upload-artifact@v2
