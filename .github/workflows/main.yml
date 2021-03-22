@@ -85,7 +85,7 @@ jobs:
 
       - uses: actions/setup-python@v2
         with:
-          name: run python-report
+          #name: run python-report
           python-version: 3.9.2
           - run: |
             python -m pip install --upgrade pip setuptools wheel
