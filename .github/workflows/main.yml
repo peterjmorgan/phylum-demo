@@ -95,6 +95,7 @@ jobs:
             echo "[*] python: installing requirements.txt"
             pip install -r requirements.txt
           fi
+          cat ~/results.json | wc -l
           python phylum-python-report.py ~/results.json > ~/report.txt
 
       - uses: actions/upload-artifact@v2
