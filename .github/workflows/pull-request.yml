@@ -8,7 +8,7 @@ jobs:
     steps:
       - uses: mshick/add-pr-comment@v1
         with:
-          messsage: |
+          message: |
             **This is a test message**
             Oh Hai there
           repo-token: ${{ secrets.GITHUB_TOKEN }}
