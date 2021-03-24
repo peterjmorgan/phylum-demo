@@ -9,8 +9,14 @@ jobs:
       - uses: mshick/add-pr-comment@v1
         with:
           message: |
-            **This is a test message**
-            Oh Hai there
+						Software Vulnerabilites
+						====
+
+						|Package Name|High|Medium|Low|
+					  | :---: | :---: | :---: | :---: |
+						|axios|1|0|0|
+						|ini|0|0|1|
+
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          repo-token-user-login: 'github-actions[bot]'
+          repo-token-user-login: 'Phylum[bot]'
 
