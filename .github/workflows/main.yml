@@ -60,6 +60,7 @@ jobs:
           export PATH=/home/runner/work/phylum-demo/phylum-demo/phylum-js-submit:$PATH
           ls
           pushd $GITHUB_WORKSPACE || exit 1
+            phylum-cli init -p 'phylum-demo'
             phylum-js-submit.js -t package package-lock.json | egrep -o '[0-9a-f-]{36}' >> job_id
             cat job_id | xargs -I {} phylum-cli status -i {} | tail -n+2 > ~/results.json
           popd
