@@ -27,7 +27,8 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Download cli tool
-        run: wget https://phylum-cli.s3.us-east-2.amazonaws.com/phylum-cli-linux-v0.0.4.1-static.zip
+        #run: wget https://phylum-cli.s3.us-east-2.amazonaws.com/phylum-cli-linux-v0.0.4.1-static.zip
+        run: curl --silent "https://api.github.com/repos/phylum-dev/cli/releases/latest" | jq -r '.assets[] | select(.name | contains("phylum-cli-release.zip")) | .browser_download_url' | xargs curl -sLO
 
       - name: Download phylum-js-submit
         run: git clone https://github.com/peterjmorgan/phylum-js-submit
@@ -42,9 +43,12 @@ jobs:
 
       - name: Untar and install binary
         run: |
-          unzip phylum-cli-linux-v0.0.4.1-static.zip
-          export PATH="$PWD/phylum-cli-linux-v0.0.4-static-installer:$PATH"
-          pushd phylum-cli-linux-v0.0.4-static-installer || exit 1
+          #unzip phylum-cli-linux-v0.0.4.1-static.zip
+          unzip phylum-cli-release.zip -d phylum-cli-release
+          #export PATH="$PWD/phylum-cli-linux-v0.0.4-static-installer:$PATH"
+          export PATH="$PWD/phylum-cli-release:$PATH"
+          #pushd phylum-cli-linux-v0.0.4-static-installer || exit 1
+          pushd phylum-cli-release || exit 1
             bash install.sh
           popd
           echo "[*] installed phylum-cli"
