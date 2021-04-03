@@ -44,7 +44,7 @@ jobs:
       - name: Untar and install binary
         run: |
           #unzip phylum-cli-linux-v0.0.4.1-static.zip
-          unzip phylum-cli-release.zip -d phylum-cli-release
+          unzip phylum-cli-release.zip
           #export PATH="$PWD/phylum-cli-linux-v0.0.4-static-installer:$PATH"
           export PATH="$PWD/phylum-cli-release:$PATH"
           #pushd phylum-cli-linux-v0.0.4-static-installer || exit 1
