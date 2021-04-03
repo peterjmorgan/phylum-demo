@@ -64,8 +64,7 @@ jobs:
         run: |
           export PATH="$HOME/.phylum:$PATH"
           export PATH=/home/runner/work/phylum-demo/phylum-demo/phylum-js-submit:$PATH
-          echo "[i] list ~/.phylum"
-          ls ~/.phylum
+          chmod u+x ~/.phylum/phylum-cli
           pushd $GITHUB_WORKSPACE || exit 1
             phylum-cli init -p 'phylum-demo'
             phylum-js-submit.js -t package package-lock.json | egrep -o '[0-9a-f-]{36}' >> job_id
