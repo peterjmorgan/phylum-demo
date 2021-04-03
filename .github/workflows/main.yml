@@ -54,8 +54,8 @@ jobs:
           echo "[*] installed phylum-cli"
       - name: Configure phylum-cli with credentials
         run: |
-          sed -i "s/user:/user: ${{ secrets.PHYLUM_USER }}/" ~/.phylum/settings.yaml
-          sed -i "s/pass:/pass: ${{ secrets.PHYLUM_PASS }}/" ~/.phylum/settings.yaml
+          sed -i "s/user: someone@someorg.com/user: ${{ secrets.PHYLUM_USER }}/" ~/.phylum/settings.yaml
+          sed -i "s/pass: abcd1234/pass: ${{ secrets.PHYLUM_PASS }}/" ~/.phylum/settings.yaml
           echo "[i] settings.yaml"
           cat ~/.phylum/settings.yaml
           echo "[*] Configured phylum-cli with credentials"
