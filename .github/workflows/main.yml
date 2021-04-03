@@ -44,7 +44,7 @@ jobs:
       - name: Untar and install binary
         run: |
           #unzip phylum-cli-linux-v0.0.4.1-static.zip
-          unzip phylum-cli-release.zip -d phylum-cli-release
+          unzip phylum-cli-release.zip
           #export PATH="$PWD/phylum-cli-linux-v0.0.4-static-installer:$PATH"
           export PATH="$PWD/phylum-cli-release:$PATH"
           #pushd phylum-cli-linux-v0.0.4-static-installer || exit 1
@@ -54,19 +54,19 @@ jobs:
           echo "[*] installed phylum-cli"
       - name: Configure phylum-cli with credentials
         run: |
-          sed -i "s/user:/user: ${{ secrets.PHYLUM_USER }}/" ~/.phylum/settings.yaml
-          sed -i "s/pass:/pass: ${{ secrets.PHYLUM_PASS }}/" ~/.phylum/settings.yaml
+          sed -i "s/user: someone@someorg.com/user: ${{ secrets.PHYLUM_USER }}/" ~/.phylum/settings.yaml
+          sed -i "s/pass: abcd1234/pass: ${{ secrets.PHYLUM_PASS }}/" ~/.phylum/settings.yaml
           echo "[*] Configured phylum-cli with credentials"
 
       - name: Submit to API
         run: |
           export PATH="$HOME/.phylum:$PATH"
           export PATH=/home/runner/work/phylum-demo/phylum-demo/phylum-js-submit:$PATH
-          ls
+          #TODO: fix executable bit on phylum-cli build
+          chmod u+x ~/.phylum/phylum-cli
           pushd $GITHUB_WORKSPACE || exit 1
-            phylum-cli init -p 'phylum-demo'
             phylum-js-submit.js -t package package-lock.json | egrep -o '[0-9a-f-]{36}' >> job_id
-            cat job_id | xargs -I {} phylum-cli status -i {} | tail -n+2 > ~/results.json
+            cat job_id | xargs -I {} phylum-cli status -i {} -V > ~/results.json
           popd
 
       - uses: actions/upload-artifact@v2
