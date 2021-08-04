@@ -43,7 +43,7 @@ jobs:
 
       - name: Untar and install binary
         run: |
-          unzip phylum-cli-release.zip -d phylum-cli-release
+          unzip phylum-cli-release.zip
           export PATH="$PWD/phylum-cli-release:$PATH"
           pushd phylum-cli-release || exit 1
             bash install.sh
