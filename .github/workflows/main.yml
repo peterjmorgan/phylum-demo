@@ -30,24 +30,21 @@ jobs:
         #run: wget https://phylum-cli.s3.us-east-2.amazonaws.com/phylum-cli-linux-v0.0.4.1-static.zip
         run: curl --silent "https://api.github.com/repos/phylum-dev/cli/releases/latest" | jq -r '.assets[] | select(.name | contains("phylum-cli-release.zip")) | .browser_download_url' | xargs curl -sLO
 
-      - name: Download phylum-js-submit
-        run: git clone https://github.com/peterjmorgan/phylum-js-submit
+      # - name: Download phylum-js-submit
+        # run: git clone https://github.com/peterjmorgan/phylum-js-submit
 
-      - name: Install phylum-js-submit deps
-        run: |
-          pushd phylum-js-submit || exit 1
-            npm install
-            export PATH=$PWD:$PATH
-            echo "[*] installed phylum-js-submit"
-          popd
+      # - name: Install phylum-js-submit deps
+        # run: |
+          # pushd phylum-js-submit || exit 1
+            # npm install
+            # export PATH=$PWD:$PATH
+            # echo "[*] installed phylum-js-submit"
+          # popd
 
       - name: Untar and install binary
         run: |
-          #unzip phylum-cli-linux-v0.0.4.1-static.zip
           unzip phylum-cli-release.zip -d phylum-cli-release
-          #export PATH="$PWD/phylum-cli-linux-v0.0.4-static-installer:$PATH"
           export PATH="$PWD/phylum-cli-release:$PATH"
-          #pushd phylum-cli-linux-v0.0.4-static-installer || exit 1
           pushd phylum-cli-release || exit 1
             bash install.sh
           popd
@@ -61,12 +58,14 @@ jobs:
       - name: Submit to API
         run: |
           export PATH="$HOME/.phylum:$PATH"
-          export PATH=/home/runner/work/phylum-demo/phylum-demo/phylum-js-submit:$PATH
+          # export PATH=/home/runner/work/phylum-demo/phylum-demo/phylum-js-submit:$PATH
           ls
           pushd $GITHUB_WORKSPACE || exit 1
-            phylum-cli init -p 'phylum-demo'
-            phylum-js-submit.js -t package package-lock.json | egrep -o '[0-9a-f-]{36}' >> job_id
-            cat job_id | xargs -I {} phylum-cli status -i {} | tail -n+2 > ~/results.json
+            # phylum-cli init -p 'phylum-demo'
+            phylum projects create 'phylum-demo-github'
+            # phylum-js-submit.js -t package package-lock.json | egrep -o '[0-9a-f-]{36}' >> job_id
+            phylum analyze package-lock.json -V > ~/results.json
+            # cat job_id | xargs -I {} phylum-cli status -i {} | tail -n+2 > ~/results.json
           popd
 
       - uses: actions/upload-artifact@v2
@@ -74,19 +73,19 @@ jobs:
           name: results
           path: ~/results.json
 
-      - uses: actions/setup-python@v2
-        with:
-          python-version: 3.9.2
-      - name: Run python report
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
-          git clone https://github.com/peterjmorgan/phylum-python-report
-          pushd phylum-python-report || exit 1
-          if [ -f requirements.txt ];then
-            echo "[*] python: installing requirements.txt"
-            pip install -r requirements.txt
-          fi
-          python phylum-python-report.py ~/results.json > ~/report.txt
+      # - uses: actions/setup-python@v2
+        # with:
+          # python-version: 3.9.2
+      # - name: Run python report
+        # run: |
+          # python -m pip install --upgrade pip setuptools wheel
+          # git clone https://github.com/peterjmorgan/phylum-python-report
+          # pushd phylum-python-report || exit 1
+          # if [ -f requirements.txt ];then
+            # echo "[*] python: installing requirements.txt"
+            # pip install -r requirements.txt
+          # fi
+          # python phylum-python-report.py ~/results.json > ~/report.txt
 
       - uses: actions/upload-artifact@v2
         with:
