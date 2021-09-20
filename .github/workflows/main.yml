@@ -57,26 +57,6 @@ jobs:
           # name: results
           # path: ~/results.json
 
-      # - uses: actions/setup-python@v2
-        # with:
-          # python-version: 3.9.2
-      # - name: Run python report
-        # run: |
-          # python -m pip install --upgrade pip setuptools wheel
-          # git clone https://github.com/peterjmorgan/phylum-python-report
-          # pushd phylum-python-report || exit 1
-          # if [ -f requirements.txt ];then
-            # echo "[*] python: installing requirements.txt"
-            # pip install -r requirements.txt
-          # fi
-          # python phylum-python-report.py ~/results.json > ~/report.txt
-
-      # - uses: actions/upload-artifact@v2
-        # with:
-          # name: report
-          # path: ~/report.txt
-
-
 
 
 
