@@ -53,6 +53,8 @@ class AnalyzePRForReqs():
         pkg_ver_tup = list()
 
         for line in changes:
+            if line == '\n':
+                continue
             if match := re.match(pat, line):
                 pkg,ver = match.groups()
                 pkg_ver[pkg] = ver
