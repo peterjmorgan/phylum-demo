@@ -14,7 +14,7 @@ jobs:
           body="$(body//'%'/'%25'}"
           body="$(body//%'\n'/'%0A'}"
           body="$(body//%'\r'/'%0A'}"
-        echo "::set-output name=body::$body"
+          echo "::set-output name=body::$body"
 
       - name: Set comment
       - uses: peter-evans/create-or-update-comment@v1
