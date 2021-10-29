@@ -1,16 +1,163 @@
-name: add_pr_comment
+name: check_new_deps_python
 on:
   pull_request:
+    branches:
+      - master # check if branchname == 'main'
+env:
+  # TODO: Fix this
+  PR_NUM: ${{ github.event.number }}
+  # PR_NUM: 10
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: mshick/add-pr-comment@v1
+      # - name: Chown
+        # run: |
+          # sudo chown -R runner .
+          # # sudo chown -R runner /var/run/act #TODO: act - remove
+
+      - uses: actions/checkout@v2
+
+      - name: Download cli tool
+        run: curl --silent "https://api.github.com/repos/phylum-dev/cli/releases/latest" | jq -r '.assets[] | select(.name | contains("phylum-cli-release.zip")) | .browser_download_url' | xargs curl -sLo ~/phylum-cli-release.zip
+
+      - name: Untar and install binary
+        run: |
+          unzip ~/phylum-cli-release.zip -d ~
+          # export PATH="$PWD/phylum-cli-release:$PATH"
+          export PATH="$HOME/phylum-cli-release:$PATH"
+          pushd "$HOME/phylum-cli-release" || exit 1
+            bash install.sh
+          popd
+          echo "[*] installed phylum-cli"
+      - name: Configure phylum-cli with credentials
+        run: |
+          #TODO: update to use token
+          sed -i "s/user:.*/user: ${{ secrets.PHYLUM_USER }}/" ~/.phylum/settings.yaml
+          sed -i "s/pass:.*/pass: ${{ secrets.PHYLUM_PASS }}/" ~/.phylum/settings.yaml
+          # cat ~/.phylum/settings.yaml
+          echo "[*] Configured phylum-cli with credentials"
+
+      # - name: Setup tmate session
+        # uses: mxschmitt/action-tmate@v3
+
+      #TODO: use 'find' to locate the requirements.txt if the file is not in CWD
+      #TODO: use 'find' to locate a .phylum_project file
+      #       if one does NOT exist, create a new project with the label PR#-GH_actions
+      #       if one DOES exist, use the existing project and analyze with a label PR#-GH_actions
+      - name: Check for existing project
+        run: |
+          result=$(find . -maxdepth 1 -iname ".phylum_project")
+          if [[ -n $result ]]; then
+            echo "Phylum project found: $result"
+          else
+            echo "[ERROR] Phylum project file not found"
+            exit 1
+          fi
+          # failcase=$(find . -maxdepth 1 -iname "bliiepow")
+          # if [[ -z $failcase ]]; then
+            # echo "failcase true"
+          # else
+            # echo "failcase false"
+          # fi
+          # OKAY! bash shit works as expected HAHAHAHAHAHAHA no it doesn't.
+      # - name: Check and set PR_NUM env variable
+        # run: |
+          # # export PR_TEMP="{{ github.event.number }}"
+          # if [[ -z $PR_NUM ]]; then
+            # echo "PR_NUM isn't set"
+            # echo PR_NUM=7 >> $GITHUB_ENV
+          # else
+            # echo "PR_NUM is set: ${PR_NUM}"
+          # fi
+
+      - name: Check and set GITHUB_HEAD_REF env variable
+        run: |
+          if [[ -z $GITHUB_HEAD_REF ]]; then
+            echo "GITHUB_HEAD_REF isn't set"
+            echo GITHUB_HEAD_REF="refs/thingy/master" >> $GITHUB_ENV
+          else
+            echo "GITHUB_HEAD_REF is set: ${GITHUB_HEAD_REF}"
+          fi
+
+      - name: Generate Phylum label
+        run: |
+          echo PHYLUM_LABEL="GHA-PR${PR_NUM}-${GITHUB_HEAD_REF}" >> $GITHUB_ENV
+          echo "PHYLUM_LABEL = ${PHYLUM_LABEL}"
+
+      - name: Analyze project lockfile
+        run: |
+          export PATH="$HOME/.phylum:$PATH"
+          pushd $GITHUB_WORKSPACE || exit 1
+            # phylum projects create 'phylum-demo-github'
+            phylum analyze -l $PHYLUM_LABEL requirements.txt --verbose --json > ~/phylum_analysis.json
+            echo "[*] Analyzed requirements.txt under label ${PHYLUM_LABEL} and wrote results to ~/phylum_analysis.json"
+          popd
+
+      - uses: technote-space/get-diff-action@v4
         with:
-          message: |
-            **This is a test message**
-            Oh Hai there
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          repo-token-user-login: 'github-actions[bot]'
+          FILES: |
+            requirements.txt
+            pyproject.toml
+
+      - name: Get requirements.txt git diff
+        run: git diff --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} > ~/DIFF
+        if: env.GIT_DIFF
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: install python dependencies
+        run: |
+          pip install requests
+          pip install unidiff
+
+      - name: python script print env
+        run: python env_test.py
+
+      - name: python script analyze_updated_requirements_txt
+        run: python analyze_updated_requirements_txt.py peterjmorgan phylum-demo 10 0.1 0.2 0.2 0.2 0.2
+
+      - name: cat pr_comment.txt
+        run: cat ~/pr_comment.txt
+
+      # - uses: jannekem/run-python-script-action@v1
+        # with:
+          # script: |
+            # import os
+            # import requests
+            # import json
+            # from unidiff import PatchSet
+
+            # # print("Directory contents:")
+            # # for f in os.listdir():
+              # # print(f)
+
+            # resp = requests.get('https://patch-diff.githubusercontent.com/raw/peterjmorgan/phylum-demo/pull/7.diff')
+            # print(f"Status: {resp.status_code}")
+
+            # print("GIT_DIFF")
+            # git_diff_env = os.getenv('GIT_DIFF')
+            # print(git_diff_env)
+
+            # # ## get the diff hunks
+            # # # patches = PatchSet(resp.content.decode('utf-8'))
+            # # # changes = list()
+            # # # for patchfile in patches:
+              # # # TODO: check other files
+              # # # print(f"target_file = {patchfile.target_file}")
+              # # # if 'requirements.txt' == patchfile.path:
+                # # # for hunk in patchfile:
+                  # # # changes.append(hunk.target)
+            # # # print(f"len of changes = {len(changes)}")
+
+            # # # parsed_changes = dict()
+            # # # for change in changes:
+              # # # change = change.replace('+','').replace('=','').strip()
+              # # # pkg, ver = change.split('=')
+              # # # parsed_changes[pkg] = ver
+
+            # # # print(json.dumps(parsed_changes))
 
