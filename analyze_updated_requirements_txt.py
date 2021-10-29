@@ -74,7 +74,7 @@ class AnalyzePRForReqs():
             #  risk_data[f"{pkg}__{ver}"] = data
         #  return risk_data
 
-    def read_phylum_analysis(self, filename='phylum_analysis.json'):
+    def read_phylum_analysis(self, filename='/home/runner/phylum_analysis.json'):
         with open(filename,'r') as infile:
             phylum_analysis_json = json.loads(infile.read())
         print(f"[DEBUG] read {len(phylum_analysis_json)} bytes")
@@ -124,7 +124,7 @@ class AnalyzePRForReqs():
         changes = self.get_reqs_hunks(diff_data)
         pkg_ver = self.generate_pkgver(changes)
         #  phylum_json = self.read_phylum_analysis()
-        phylum_json = self.read_phylum_analysis('phylum_analysis.json')
+        phylum_json = self.read_phylum_analysis('/home/runner/phylum_analysis.json')
         risk_data = self.parse_risk_data(phylum_json, pkg_ver)
 
         #  embed()
