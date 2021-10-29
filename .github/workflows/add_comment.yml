@@ -14,7 +14,9 @@ jobs:
           # sudo chown -R runner /var/run/act
       - name: Set env var
         run: |
-          echo PETE_TEST="THIS IS A TEST COMMENT\nWith multiple lines\nand newlines\nand jazz\n\n\nboop" >> $GITHUB_ENV
+          echo PETE_TEST="THIS IS A TEST COMMENT
+          With multiple lines\
+          and newlines  " >> $GITHUB_ENV
       - uses: mshick/add-pr-comment@v1
         with:
           message: ${{ env.PETE_TEST }}
