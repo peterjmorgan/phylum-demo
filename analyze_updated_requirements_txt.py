@@ -124,7 +124,7 @@ class AnalyzePRForReqs():
         changes = self.get_reqs_hunks(diff_data)
         pkg_ver = self.generate_pkgver(changes)
         #  phylum_json = self.read_phylum_analysis()
-        phylum_json = self.read_phylum_analysis('test_analysis.json')
+        phylum_json = self.read_phylum_analysis('phylum_analysis.json')
         risk_data = self.parse_risk_data(phylum_json, pkg_ver)
 
         #  embed()
