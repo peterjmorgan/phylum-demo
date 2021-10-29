@@ -7,8 +7,8 @@ on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
+  # pull_request:
+    # branches: [ master ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -27,13 +27,14 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Download cli tool
-        run: curl --silent "https://api.github.com/repos/phylum-dev/cli/releases/latest" | jq -r '.assets[] | select(.name | contains("phylum-cli-release.zip")) | .browser_download_url' | xargs curl -sLO
+        run: curl --silent "https://api.github.com/repos/phylum-dev/cli/releases/latest" | jq -r '.assets[] | select(.name | contains("phylum-cli-release.zip")) | .browser_download_url' | xargs curl -sLo ~/phylum-cli-release.zip
 
       - name: Untar and install binary
         run: |
-          unzip phylum-cli-release.zip
-          export PATH="$PWD/phylum-cli-release:$PATH"
-          pushd phylum-cli-release || exit 1
+          unzip ~/phylum-cli-release.zip -d ~
+          # export PATH="$PWD/phylum-cli-release:$PATH"
+          export PATH="$HOME/phylum-cli-release:$PATH"
+          pushd "$HOME/phylum-cli-release" || exit 1
             bash install.sh
           popd
           echo "[*] installed phylum-cli"
@@ -49,17 +50,5 @@ jobs:
           export PATH="$HOME/.phylum:$PATH"
           pushd $GITHUB_WORKSPACE || exit 1
             # phylum projects create 'phylum-demo-github'
-            phylum analyze package-lock.json -V
+            phylum analyze package-lock.json --verbose
           popd
-
-      # - uses: actions/upload-artifact@v2
-        # with:
-          # name: results
-          # path: ~/results.json
-
-
-
-
-
-
-
