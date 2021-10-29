@@ -22,7 +22,10 @@ class AnalyzePRForReqs():
 
     def get_PR_diff(self):
         #  resp = requests.get('https://patch-diff.githubusercontent.com/raw/peterjmorgan/phylum-demo/pull/7.diff')
-        url = f"https://patch-diff.githubusercontent.com/raw/{self.repo}/pull/{self.pr_num}.diff"
+        repo = self.repo
+        if '_' in repo:
+            repo = repo.replace('_','-')
+        url = f"https://patch-diff.githubusercontent.com/raw/{repo}/pull/{self.pr_num}.diff"
         resp = requests.get(url)
         print(f"[D] get_PR_diff - resp.status_code: {resp.status_code}")
         return resp.content
