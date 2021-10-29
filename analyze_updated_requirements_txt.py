@@ -9,8 +9,8 @@ import pathlib
 #  from IPython import embed
 
 class AnalyzePRForReqs():
-    def __init__(self, owner, repo, pr_num, vul, mal, eng, lic, aut):
-        self.owner = owner
+    def __init__(self, repo, pr_num, vul, mal, eng, lic, aut):
+        #  self.owner = owner
         self.repo = repo
         self.pr_num = pr_num
         self.vul = float(vul)
@@ -22,7 +22,7 @@ class AnalyzePRForReqs():
 
     def get_PR_diff(self):
         #  resp = requests.get('https://patch-diff.githubusercontent.com/raw/peterjmorgan/phylum-demo/pull/7.diff')
-        url = f"https://patch-diff.githubusercontent.com/raw/{self.owner}/{self.repo}/pull/{self.pr_num}.diff"
+        url = f"https://patch-diff.githubusercontent.com/raw/{self.repo}/pull/{self.pr_num}.diff"
         resp = requests.get(url)
         print(f"[D] get_PR_diff - resp.status_code: {resp.status_code}")
         return resp.content
@@ -142,20 +142,20 @@ class AnalyzePRForReqs():
 if __name__ == "__main__":
     argv = sys.argv
 
-    if argc := len(sys.argv) < 9:
+    if argc := len(sys.argv) < 8:
         print(f"Usage: {argv[0]} DIFF_URL VUL_THRESHOLD MAL_THRESHOLD ENG_THRESHOLD LIC_THRESHOLD AUT_THRESHOLD")
         sys.exit(1)
 
     #  diff_url = argv[1]
-    owner = argv[1]
-    repo = argv[2]
-    pr_num = argv[3]
-    vul = argv[4]
-    mal = argv[5]
-    eng = argv[6]
-    lic = argv[7]
-    aut = argv[8]
+    #  owner = argv[1]
+    repo = argv[1]
+    pr_num = argv[2]
+    vul = argv[3]
+    mal = argv[4]
+    eng = argv[5]
+    lic = argv[6]
+    aut = argv[7]
 
-    a = AnalyzePRForReqs(owner, repo, pr_num, vul, mal, eng, lic, aut)
+    a = AnalyzePRForReqs(repo, pr_num, vul, mal, eng, lic, aut)
     a.run()
 

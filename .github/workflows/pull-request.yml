@@ -4,18 +4,17 @@ on:
     branches:
       - master # check if branchname == 'main'
 env:
-  # TODO: Fix this
   PR_NUM: ${{ github.event.number }}
-  # PR_NUM: 10
+  VUL: 0.5
+  MAL: 0.3
+  ENG: 0.3
+  LIC: 0.2
+  AUT: 0.3
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      # - name: Chown
-        # run: |
-          # sudo chown -R runner .
-          # # sudo chown -R runner /var/run/act #TODO: act - remove
 
       - uses: actions/checkout@v2
 
@@ -39,11 +38,6 @@ jobs:
           # cat ~/.phylum/settings.yaml
           echo "[*] Configured phylum-cli with credentials"
 
-
-      #TODO: use 'find' to locate the requirements.txt if the file is not in CWD
-      #TODO: use 'find' to locate a .phylum_project file
-      #       if one does NOT exist, create a new project with the label PR#-GH_actions
-      #       if one DOES exist, use the existing project and analyze with a label PR#-GH_actions
       - name: Check for existing project
         run: |
           result=$(find . -maxdepth 1 -iname ".phylum_project")
@@ -116,7 +110,8 @@ jobs:
         run: python env_test.py
 
       - name: python script analyze_updated_requirements_txt
-        run: python analyze_updated_requirements_txt.py peterjmorgan phylum-demo 10 0.1 0.2 0.2 0.2 0.2
+        run: python analyze_updated_requirements_txt.py $GITHUB_REPOSITORY $PR_NUM $VUL $MAL $ENG $LIC $AUT
+        # run: python analyze_updated_requirements_txt.py peterjmorgan phylum-demo $PR_NUM $VUL $MAL $ENG $LIC $AUT
 
       - name: cat pr_comment.txt
         run: cat ~/pr_comment.txt
