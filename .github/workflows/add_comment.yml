@@ -1,0 +1,23 @@
+name: add_pr_comment
+on:
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      # - name: Chown
+        # run: |
+          # sudo chown -R runner .
+          # sudo chown -R runner /var/run/act
+      - name: Set env var
+        run: |
+          echo PETE_TEST="THIS IS A TEST COMMENT" >> $GITHUB_ENV
+      - uses: mshick/add-pr-comment@v1
+        with:
+          message: ${{ env.PETE_TEST }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token-user-login: 'github-actions[bot]'
+
