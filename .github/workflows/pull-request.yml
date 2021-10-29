@@ -109,8 +109,8 @@ jobs:
       - name: python script print env
         run: python env_test.py
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
+      # - name: Setup tmate session
+        # uses: mxschmitt/action-tmate@v3
 
       - name: python script analyze_updated_requirements_txt
         run: python analyze_updated_requirements_txt.py $GITHUB_REPOSITORY $PR_NUM $VUL $MAL $ENG $LIC $AUT
