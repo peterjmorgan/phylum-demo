@@ -8,18 +8,18 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      # - name: Chown
-        # run: |
-          # sudo chown -R runner .
-          # sudo chown -R runner /var/run/act
-      - name: Set env var
+      - id: get-comment-body
         run: |
-          echo PETE_TEST="THIS IS A TEST COMMENT
-          With multiple lines\
-          and newlines  " >> $GITHUB_ENV
-      - uses: mshick/add-pr-comment@v1
+          body="$(cat comment-body.txt)"
+          body="$(body//'%'/'%25'}"
+          body="$(body//%'\n'/'%0A'}"
+          body="$(body//%'\r'/'%0A'}"
+        echo "::set-output name=body::$body"
+
+      - name: Set comment
+      - uses: peter-evans/create-or-update-comment@v1
         with:
-          message: ${{ env.PETE_TEST }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          repo-token-user-login: 'github-actions[bot]'
+          issue-number: ${{ github.event.pull_request.number }}
+          body: ${{ steps.get-comment-body.outputs.body }}
+          comment-author: 'github-action[bot]'
 
