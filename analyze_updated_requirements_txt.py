@@ -133,7 +133,7 @@ class AnalyzePRForReqs():
                 print(line)
 
         print(f"CWD = {pathlib.Path.cwd()}")
-        with open('pr_comment.txt','w') as outfile:
+        with open('/home/runner/pr_comment.txt','w') as outfile:
             for line in risk_data:
                 if line:
                     outfile.write(line)
