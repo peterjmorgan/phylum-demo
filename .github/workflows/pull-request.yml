@@ -39,8 +39,6 @@ jobs:
           # cat ~/.phylum/settings.yaml
           echo "[*] Configured phylum-cli with credentials"
 
-      # - name: Setup tmate session
-        # uses: mxschmitt/action-tmate@v3
 
       #TODO: use 'find' to locate the requirements.txt if the file is not in CWD
       #TODO: use 'find' to locate a .phylum_project file
@@ -122,6 +120,9 @@ jobs:
 
       - name: cat pr_comment.txt
         run: cat ~/pr_comment.txt
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
 
       # - uses: jannekem/run-python-script-action@v1
         # with:
