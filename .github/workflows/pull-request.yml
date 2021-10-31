@@ -119,6 +119,21 @@ jobs:
       - name: cat pr_comment.txt
         run: cat ~/pr_comment.txt
 
+      - id: get-comment-body
+        run: |
+          body="$(cat ~/pr_comment.txt)"
+          body="$(body//'%'/'%25'}"
+          body="$(body//%'\n'/'%0A'}"
+          body="$(body//%'\r'/'%0A'}"
+          echo "::set-output name=body::$body"
+
+      - name: Set comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: ${{ steps.get-comment-body.outputs.body }}
+          comment-author: 'github-action[bot]'
+
 
       # - uses: jannekem/run-python-script-action@v1
         # with:
@@ -157,4 +172,5 @@ jobs:
               # # # parsed_changes[pkg] = ver
 
             # # # print(json.dumps(parsed_changes))
+
 
