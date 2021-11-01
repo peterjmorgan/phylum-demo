@@ -1,5 +1,0 @@
-This is example text
-
-Newline 1
-
-Newline 2
