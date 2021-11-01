@@ -47,22 +47,6 @@ jobs:
             echo "[ERROR] Phylum project file not found"
             exit 1
           fi
-          # failcase=$(find . -maxdepth 1 -iname "bliiepow")
-          # if [[ -z $failcase ]]; then
-            # echo "failcase true"
-          # else
-            # echo "failcase false"
-          # fi
-          # OKAY! bash shit works as expected HAHAHAHAHAHAHA no it doesn't.
-      # - name: Check and set PR_NUM env variable
-        # run: |
-          # # export PR_TEMP="{{ github.event.number }}"
-          # if [[ -z $PR_NUM ]]; then
-            # echo "PR_NUM isn't set"
-            # echo PR_NUM=7 >> $GITHUB_ENV
-          # else
-            # echo "PR_NUM is set: ${PR_NUM}"
-          # fi
 
       - name: Check and set GITHUB_HEAD_REF env variable
         run: |
@@ -91,7 +75,7 @@ jobs:
         with:
           FILES: |
             requirements.txt
-            pyproject.toml
+            #pyproject.toml
 
       - name: Get requirements.txt git diff
         run: git diff --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} > ~/DIFF
@@ -105,12 +89,6 @@ jobs:
         run: |
           pip install requests
           pip install unidiff
-
-      - name: python script print env
-        run: python env_test.py
-
-      # - name: Setup tmate session
-        # uses: mxschmitt/action-tmate@v3
 
       - name: python script analyze_updated_requirements_txt
         run: python analyze_updated_requirements_txt.py $GITHUB_REPOSITORY $PR_NUM $VUL $MAL $ENG $LIC $AUT
@@ -132,45 +110,5 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: ${{ steps.get-comment-body.outputs.body }}
-          comment-author: 'github-action[bot]'
-
-
-      # - uses: jannekem/run-python-script-action@v1
-        # with:
-          # script: |
-            # import os
-            # import requests
-            # import json
-            # from unidiff import PatchSet
-
-            # # print("Directory contents:")
-            # # for f in os.listdir():
-              # # print(f)
-
-            # resp = requests.get('https://patch-diff.githubusercontent.com/raw/peterjmorgan/phylum-demo/pull/7.diff')
-            # print(f"Status: {resp.status_code}")
-
-            # print("GIT_DIFF")
-            # git_diff_env = os.getenv('GIT_DIFF')
-            # print(git_diff_env)
-
-            # # ## get the diff hunks
-            # # # patches = PatchSet(resp.content.decode('utf-8'))
-            # # # changes = list()
-            # # # for patchfile in patches:
-              # # # TODO: check other files
-              # # # print(f"target_file = {patchfile.target_file}")
-              # # # if 'requirements.txt' == patchfile.path:
-                # # # for hunk in patchfile:
-                  # # # changes.append(hunk.target)
-            # # # print(f"len of changes = {len(changes)}")
-
-            # # # parsed_changes = dict()
-            # # # for change in changes:
-              # # # change = change.replace('+','').replace('=','').strip()
-              # # # pkg, ver = change.split('=')
-              # # # parsed_changes[pkg] = ver
-
-            # # # print(json.dumps(parsed_changes))
-
+          comment-author: 'Phylum[bot]'
 

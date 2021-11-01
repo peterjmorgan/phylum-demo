@@ -8,6 +8,16 @@ from unidiff import PatchSet
 import pathlib
 #  from IPython import embed
 
+
+'''
+TODO:
+[DONE] 1. Link to project in UI
+2. Get JSON for issues/vulns and put in comment
+[DONE] 3. Add in error codes
+    11 - couldn't get PR diff
+    12 - found non-concrete dependencies
+'''
+
 class AnalyzePRForReqs():
     def __init__(self, repo, pr_num, vul, mal, eng, lic, aut):
         #  self.owner = owner
@@ -26,7 +36,11 @@ class AnalyzePRForReqs():
         if '_' in repo:
             repo = repo.replace('_','-')
         url = f"https://patch-diff.githubusercontent.com/raw/{repo}/pull/{self.pr_num}.diff"
-        resp = requests.get(url)
+        try:
+            resp = requests.get(url)
+        except Exception as e:
+            print(f"[ERROR] Couldn't get patch diff via url")
+            sys.exit(11)
         print(f"[D] get_PR_diff - resp.status_code: {resp.status_code}")
         return resp.content
 
@@ -64,22 +78,14 @@ class AnalyzePRForReqs():
 
         if no_version > 0:
             print(f"[ERROR] Found entries that do not specify version, preventing analysis. Exiting")
-            sys.exit(1)
+            sys.exit(11)
 
         return pkg_ver_tup
 
-# Can be removed, using phylum analyze in GH actions step
-#  def phylum_analyze(pkg_ver):
-        #  risk_data = dict()
-        #  for pkg,ver in pkg_ver.items():
-            #  command = f"./phylum package {pkg} {ver} --json" # TODO: fix path
-            #  result = run(command.split(' '), capture_output=True, cwd="/root/.phylum/") #TODO: fix cwd
-            #  response = result.stdout.decode('utf-8')
-            #  data = json.loads(response)
-            #  risk_data[f"{pkg}__{ver}"] = data
-        #  return risk_data
-
     def read_phylum_analysis(self, filename='/home/runner/phylum_analysis.json'):
+        if not pathlib.Path(filename).is_file():
+            print(f"[ERROR] Cannot find {filename}")
+            sys.exit(11)
         with open(filename,'r') as infile:
             phylum_analysis_json = json.loads(infile.read())
         print(f"[DEBUG] read {len(phylum_analysis_json)} bytes")
@@ -123,6 +129,10 @@ class AnalyzePRForReqs():
 
         return fail_string if failed else None
 
+    def get_project_url(self, phylum_json):
+        project_id = phylum_json.get("project")
+        url = f"https://app.phylum.io/projects/{project_id}"
+        return url
 
     def run(self):
         diff_data = self.get_PR_diff()
@@ -131,17 +141,18 @@ class AnalyzePRForReqs():
         #  phylum_json = self.read_phylum_analysis()
         phylum_json = self.read_phylum_analysis('/home/runner/phylum_analysis.json')
         risk_data = self.parse_risk_data(phylum_json, pkg_ver)
+        project_url = self.get_project_url(phylum_json)
 
         #  embed()
         for line in risk_data:
             if line:
                 print(line)
 
-        print(f"CWD = {pathlib.Path.cwd()}")
         with open('/home/runner/pr_comment.txt','w') as outfile:
             for line in risk_data:
                 if line:
                     outfile.write(line)
+            outfile.write(f"[View this project in Phylum UI][{project_url}]")
 
 
 if __name__ == "__main__":
@@ -149,7 +160,7 @@ if __name__ == "__main__":
 
     if argc := len(sys.argv) < 8:
         print(f"Usage: {argv[0]} DIFF_URL VUL_THRESHOLD MAL_THRESHOLD ENG_THRESHOLD LIC_THRESHOLD AUT_THRESHOLD")
-        sys.exit(1)
+        sys.exit(11)
 
     #  diff_url = argv[1]
     #  owner = argv[1]
