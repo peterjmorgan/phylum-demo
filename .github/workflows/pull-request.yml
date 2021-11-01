@@ -44,7 +44,7 @@ jobs:
           if [[ -n $result ]]; then
             echo "Phylum project found: $result"
           else
-            echo "[ERROR] Phylum project file not found"
+            echo "[ERROR] Phylum project file not found. Please create a project manually first."
             exit 1
           fi
           # failcase=$(find . -maxdepth 1 -iname "bliiepow")
