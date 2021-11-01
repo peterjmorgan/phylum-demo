@@ -152,7 +152,7 @@ class AnalyzePRForReqs():
             for line in risk_data:
                 if line:
                     outfile.write(line)
-            outfile.write(f"[View this project in Phylum UI][{project_url}]")
+            outfile.write(f"[View this project in Phylum UI]({project_url})")
 
 
 if __name__ == "__main__":
