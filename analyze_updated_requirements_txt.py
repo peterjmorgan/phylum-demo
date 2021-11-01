@@ -104,7 +104,10 @@ class AnalyzePRForReqs():
     def check_risk_scores(self, package_json):
         riskvectors = package_json.get('riskVectors')
         failed = 0
-        fail_string = f"Package: {package_json.get('name')} failed.\n"
+        fail_string = f"### Package: `{package_json.get('name')}` failed.\n"
+        fail_string += f"|Risk Domain|Identified Score|Requirement|\n"
+        fail_string += f"|-----------|----------------|-----------|\n"
+
 
         pkg_vul = riskvectors.get('vulnerability')
         pkg_mal = riskvectors.get('malicious_code')
@@ -113,19 +116,23 @@ class AnalyzePRForReqs():
         pkg_aut = riskvectors.get('author')
         if pkg_vul < self.vul:
             failed = 1
-            fail_string += f"\t- Vulnerability Risk: package risk score: {pkg_vul} - requirement: {self.vul}\n"
+            # fail_string += f"\t- Vulnerability Risk: identified score: **{pkg_vul}** - requirement: **{self.vul}**\n"
+            fail_string += f"|Software Vulnerability|{pkg_vul}|{self.vul}|\n"
         if pkg_mal < self.mal:
             failed = 1
-            fail_string += f"\t- Malicious Code Risk: package risk score: {pkg_mal} - requirement: {self.mal}\n"
+            # fail_string += f"\t- Malicious Code Risk: identified score: **{pkg_mal}** - requirement: **{self.mal}**\n"
+            fail_string += f"|Malicious Code|{pkg_mal}|{self.mul}|\n"
         if pkg_eng < self.eng:
             failed = 1
-            fail_string += f"\t- Engineering Risk: package risk score: {pkg_eng} - requirement: {self.eng}\n"
+            fail_string += f"|Engineering|{pkg_eng}|{self.eng}|\n"
         if pkg_lic < self.lic:
             failed = 1
-            fail_string += f"\t- License Risk: package risk score: {pkg_lic} - requirement: {self.lic}\n"
+            # fail_string += f"\t- License Risk: package risk score: {pkg_lic} - requirement: {self.lic}\n"
+            fail_string += f"|License|{pkg_lic}|{self.lic}|\n"
         if pkg_aut < self.aut:
             failed = 1
-            fail_string += f"\t- Author Risk: package risk score: {pkg_aut} - requirement: {self.aut}\n"
+            # fail_string += f"\t- Author Risk: package risk score: {pkg_aut} - requirement: {self.aut}\n"
+            fail_string += f"|Author|{pkg_aut}|{self.aut}|\n"
 
         return fail_string if failed else None
 
@@ -148,11 +155,14 @@ class AnalyzePRForReqs():
             if line:
                 print(line)
 
+        header = "## Phylum OSS Supply Chain Risk Analysis\n\n"
+
         with open('/home/runner/pr_comment.txt','w') as outfile:
+            outfile.write(header)
             for line in risk_data:
                 if line:
                     outfile.write(line)
-            outfile.write(f"[View this project in Phylum UI]({project_url})")
+            outfile.write(f"\n[View this project in Phylum UI]({project_url})")
 
 
 if __name__ == "__main__":
