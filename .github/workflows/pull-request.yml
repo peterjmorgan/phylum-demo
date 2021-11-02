@@ -1,10 +1,18 @@
-name: check_new_deps_python
+name: analyze updated dependencies in requirements.txt
 on:
   pull_request:
     branches:
       - master # check if branchname == 'main'
 env:
   PR_NUM: ${{ github.event.number }}
+  # Set these values to risk domain thresholds
+  # Example:
+  #   Set a vulnerability score threshold of "50/100". Any packages found with a
+  #   vulnerability risk score less than 50 will fail this check.
+  #     VUL: 0.5
+  #   Set a malicious score threshold of "35/100". Any packages found with a
+  #   malicious code risk score less than 35 will fail this check.
+  #     MAL: 0.35
   VUL: 0.5
   MAL: 0.3
   ENG: 0.3
@@ -18,25 +26,32 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - name: Download cli tool
-        run: curl --silent "https://api.github.com/repos/phylum-dev/cli/releases/latest" | jq -r '.assets[] | select(.name | contains("phylum-cli-release.zip")) | .browser_download_url' | xargs curl -sLo ~/phylum-cli-release.zip
+      - id: phylum-install
+        uses: peterjmorgan/install-phylum-latest-action@master
+        with:
+          phylum_username: ${{ secrets.PHYLUM_USER }}
+          phylum_password: ${{ secrets.PHYLUM_PASS }}
 
-      - name: Untar and install binary
-        run: |
-          unzip ~/phylum-cli-release.zip -d ~
-          # export PATH="$PWD/phylum-cli-release:$PATH"
-          export PATH="$HOME/phylum-cli-release:$PATH"
-          pushd "$HOME/phylum-cli-release" || exit 1
-            bash install.sh
-          popd
-          echo "[*] installed phylum-cli"
-      - name: Configure phylum-cli with credentials
-        run: |
-          #TODO: update to use token
-          sed -i "s/user:.*/user: ${{ secrets.PHYLUM_USER }}/" ~/.phylum/settings.yaml
-          sed -i "s/pass:.*/pass: ${{ secrets.PHYLUM_PASS }}/" ~/.phylum/settings.yaml
-          # cat ~/.phylum/settings.yaml
-          echo "[*] Configured phylum-cli with credentials"
+      # - name: Download cli tool
+        # run: curl --silent "https://api.github.com/repos/phylum-dev/cli/releases/latest" | jq -r '.assets[] | select(.name | contains("phylum-cli-release.zip")) | .browser_download_url' | xargs curl -sLo ~/phylum-cli-release.zip
+
+      # - name: Untar and install phylum
+        # run: |
+          # unzip ~/phylum-cli-release.zip -d ~
+          # # export PATH="$PWD/phylum-cli-release:$PATH"
+          # export PATH="$HOME/phylum-cli-release:$PATH"
+          # pushd "$HOME/phylum-cli-release" || exit 11
+            # bash install.sh
+          # popd
+          # echo "[*] installed phylum-cli"
+
+      # - name: Configure phylum with credentials
+        # run: |
+          # #TODO: update to use token
+          # sed -i "s/user:.*/user: ${{ secrets.PHYLUM_USER }}/" ~/.phylum/settings.yaml
+          # sed -i "s/pass:.*/pass: ${{ secrets.PHYLUM_PASS }}/" ~/.phylum/settings.yaml
+          # # cat ~/.phylum/settings.yaml
+          # echo "[*] Configured phylum-cli with credentials"
 
       - name: Check for existing project
         run: |
@@ -45,7 +60,7 @@ jobs:
             echo "Phylum project found: $result"
           else
             echo "[ERROR] Phylum project file not found"
-            exit 1
+            exit 11
           fi
 
       - name: Check and set GITHUB_HEAD_REF env variable
@@ -65,8 +80,7 @@ jobs:
       - name: Analyze project lockfile
         run: |
           export PATH="$HOME/.phylum:$PATH"
-          pushd $GITHUB_WORKSPACE || exit 1
-            # phylum projects create 'phylum-demo-github'
+          pushd $GITHUB_WORKSPACE || exit 11
             phylum analyze -l $PHYLUM_LABEL requirements.txt --verbose --json > ~/phylum_analysis.json
             echo "[*] Analyzed requirements.txt under label ${PHYLUM_LABEL} and wrote results to ~/phylum_analysis.json"
           popd
@@ -92,7 +106,6 @@ jobs:
 
       - name: python script analyze_updated_requirements_txt
         run: python analyze_updated_requirements_txt.py $GITHUB_REPOSITORY $PR_NUM $VUL $MAL $ENG $LIC $AUT
-        # run: python analyze_updated_requirements_txt.py peterjmorgan phylum-demo $PR_NUM $VUL $MAL $ENG $LIC $AUT
 
       - id: get-returncode
         run: |
