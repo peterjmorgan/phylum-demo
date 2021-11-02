@@ -139,6 +139,7 @@ class AnalyzePRForReqs():
             fail_string += f"|Author|{pkg_aut*100}|{self.aut*100}|\n"
 
         fail_string += "\n"
+        fail_string += "#### Issues Summary\n"
         fail_string += f"|Risk Domain|Risk Level|Title|\n"
         fail_string += f"|-----------|----------|-----|\n"
 
@@ -158,18 +159,6 @@ class AnalyzePRForReqs():
                 risk_level = vuln.get("risk_level")
                 title = vuln.get("title")
                 issues.append(('VUL', risk_level,title))
-        #  if 'mal' in issue_flags:
-            #  for pkg_issue in pkg_issues:
-                #  if 'mal' in pkg_issue.get("risk_domain"):
-                    #  risk_level = pkg_issue.get("risk_level")
-                    #  title = pkg_issue.get("title")
-                    #  issues.append((risk_level,title))
-        #  if 'eng' in issue_flags:
-            #  for pkg_issue in pkg_issues:
-                #  if 'eng' in pkg_issue.get("risk_domain"):
-                    #  risk_level = pkg_issue.get("risk_level")
-                    #  title = pkg_issue.get("title")
-                    #  issues.append((risk_level,title))
 
         for flag in issue_flags:
             for pkg_issue in pkg_issues:
@@ -191,7 +180,6 @@ class AnalyzePRForReqs():
         diff_data = self.get_PR_diff()
         changes = self.get_reqs_hunks(diff_data)
         pkg_ver = self.generate_pkgver(changes)
-        #  phylum_json = self.read_phylum_analysis()
         phylum_json = self.read_phylum_analysis('/home/runner/phylum_analysis.json')
         risk_data = self.parse_risk_data(phylum_json, pkg_ver)
         project_url = self.get_project_url(phylum_json)
