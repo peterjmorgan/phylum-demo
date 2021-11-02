@@ -97,9 +97,9 @@ jobs:
       - id: get-returncode
         run: |
           ret="$(cat ~/returncode.txt)"
-          ret="${cat//'%'/'%25'}"
-          ret="${cat//$'\n'/'%0A'}"
-          ret="${cat//$'\r'/'%0A'}"
+          ret="${ret//'%'/'%25'}"
+          ret="${ret//$'\n'/'%0A'}"
+          ret="${ret//$'\r'/'%0A'}"
           echo "::set-output name=ret::$ret"
 
       - name: print returncode
