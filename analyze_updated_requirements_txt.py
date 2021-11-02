@@ -6,17 +6,6 @@ import json
 import re
 from unidiff import PatchSet
 import pathlib
-#  from IPython import embed
-
-
-'''
-TODO:
-[DONE] 1. Link to project in UI
-2. Get JSON for issues/vulns and put in comment
-[DONE] 3. Add in error codes
-    11 - couldn't get PR diff
-    12 - found non-concrete dependencies
-'''
 
 class AnalyzePRForReqs():
     def __init__(self, repo, pr_num, vul, mal, eng, lic, aut):
@@ -28,6 +17,9 @@ class AnalyzePRForReqs():
         self.eng = float(eng)
         self.lic = float(lic)
         self.aut = float(aut)
+        self.gbl_failed = False
+        self.gbl_incomplete = False
+        self.incomplete_pkgs = list()
 
 
     def get_PR_diff(self):
@@ -97,7 +89,11 @@ class AnalyzePRForReqs():
         for pkg,ver in pkg_ver:
             for elem in phylum_pkgs:
                 if elem.get('name') == pkg and elem.get('version') == ver:
-                    risk_scores.append(self.check_risk_scores(elem))
+                    if elem.get('status') == 'complete':
+                        risk_scores.append(self.check_risk_scores(elem))
+                    elif elem.get('status') == 'incomplete':
+                        self.incomplete_pkgs.append((pkg,ver))
+                        self.gbl_incomplete = True
 
         return risk_scores
 
@@ -147,7 +143,12 @@ class AnalyzePRForReqs():
         for rd,rl,title in issue_list:
             fail_string += f"|{rd}|{rl}|{title}|\n"
 
-        return fail_string if failed_flag else None
+        #  return fail_string if failed_flag else None
+        if failed_flag:
+            self.gbl_failed = True
+            return fail_string
+        else:
+            return None
 
     def build_issues_list(self, package_json, issue_flags: list):
         issues = list()
@@ -183,21 +184,28 @@ class AnalyzePRForReqs():
         phylum_json = self.read_phylum_analysis('/home/runner/phylum_analysis.json')
         risk_data = self.parse_risk_data(phylum_json, pkg_ver)
         project_url = self.get_project_url(phylum_json)
+        returncode = 0
 
-        #  embed()
-        for line in risk_data:
-            if line:
-                print(line)
+        # Write pr_comment.txt only if the analysis failed (self.gbl_result == 1)
+        if self.gbl_failed:
+            returncode += 1
 
-        header = "## Phylum OSS Supply Chain Risk Analysis\n\n"
-        header += "<details>\n<summary>Background</summary>\n<br />\nThis repository uses a GitHub Action to automatically analyze the risk of new dependencies added to requirements.txt via Pull Request. An administrator of this repository has set score requirements for Phylum's five risk domains.<br /><br />\nIf you see this comment, one or more dependencies added to the requirements.txt file in this Pull Request have failed Phylum's risk analysis.\n</details>\n\n"
+            header = "## Phylum OSS Supply Chain Risk Analysis\n\n"
+            header += "<details>\n<summary>Background</summary>\n<br />\nThis repository uses a GitHub Action to automatically analyze the risk of new dependencies added to requirements.txt via Pull Request. An administrator of this repository has set score requirements for Phylum's five risk domains.<br /><br />\nIf you see this comment, one or more dependencies added to the requirements.txt file in this Pull Request have failed Phylum's risk analysis.\n</details>\n\n"
 
-        with open('/home/runner/pr_comment.txt','w') as outfile:
-            outfile.write(header)
-            for line in risk_data:
-                if line:
-                    outfile.write(line)
-            outfile.write(f"\n[View this project in Phylum UI]({project_url})")
+            with open('/home/runner/pr_comment.txt','w') as outfile:
+                outfile.write(header)
+                for line in risk_data:
+                    if line:
+                        outfile.write(line)
+                outfile.write(f"\n[View this project in Phylum UI]({project_url})")
+
+        if self.gbl_incomplete == True:
+            print(f"[DEBUG] {len(self.incomplete_pkgs)} packages were incomplete as of the analysis job")
+            returncode += 5
+
+        with open('/home/runner/returncode.txt','w') as resultout:
+            resultout.write(str(returncode))
 
 
 if __name__ == "__main__":
