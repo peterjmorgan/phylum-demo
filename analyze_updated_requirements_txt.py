@@ -103,8 +103,10 @@ class AnalyzePRForReqs():
 
     def check_risk_scores(self, package_json):
         riskvectors = package_json.get('riskVectors')
-        failed = 0
-        fail_string = f"### Package: `{package_json.get('name')}` failed.\n"
+        failed_flag = 0
+        vuln_flag = 0
+        issue_flags = list()
+        fail_string = f"### Package: `{package_json.get('name')}@{package_json.get('version')}` failed.\n"
         fail_string += f"|Risk Domain|Identified Score|Requirement|\n"
         fail_string += f"|-----------|----------------|-----------|\n"
 
@@ -115,26 +117,70 @@ class AnalyzePRForReqs():
         pkg_lic = riskvectors.get('license')
         pkg_aut = riskvectors.get('author')
         if pkg_vul < self.vul:
-            failed = 1
-            # fail_string += f"\t- Vulnerability Risk: identified score: **{pkg_vul}** - requirement: **{self.vul}**\n"
-            fail_string += f"|Software Vulnerability|{pkg_vul}|{self.vul}|\n"
+            failed_flag = 1
+            vuln_flag = 1
+            issue_flags.append('vul')
+            fail_string += f"|Software Vulnerability|{pkg_vul*100}|{self.vul*100}|\n"
         if pkg_mal < self.mal:
-            failed = 1
-            # fail_string += f"\t- Malicious Code Risk: identified score: **{pkg_mal}** - requirement: **{self.mal}**\n"
-            fail_string += f"|Malicious Code|{pkg_mal}|{self.mul}|\n"
+            failed_flag = 1
+            issue_flags.append('mal')
+            fail_string += f"|Malicious Code|{pkg_mal*100}|{self.mul*100}|\n"
         if pkg_eng < self.eng:
-            failed = 1
-            fail_string += f"|Engineering|{pkg_eng}|{self.eng}|\n"
+            failed_flag = 1
+            issue_flags.append('eng')
+            fail_string += f"|Engineering|{pkg_eng*100}|{self.eng*100}|\n"
         if pkg_lic < self.lic:
-            failed = 1
-            # fail_string += f"\t- License Risk: package risk score: {pkg_lic} - requirement: {self.lic}\n"
-            fail_string += f"|License|{pkg_lic}|{self.lic}|\n"
+            failed_flag = 1
+            issue_flags.append('lic')
+            fail_string += f"|License|{pkg_lic*100}|{self.lic*100}|\n"
         if pkg_aut < self.aut:
-            failed = 1
-            # fail_string += f"\t- Author Risk: package risk score: {pkg_aut} - requirement: {self.aut}\n"
-            fail_string += f"|Author|{pkg_aut}|{self.aut}|\n"
+            failed_flag = 1
+            issue_flags.append('aut')
+            fail_string += f"|Author|{pkg_aut*100}|{self.aut*100}|\n"
 
-        return fail_string if failed else None
+        fail_string += "\n"
+        fail_string += f"|Risk Domain|Risk Level|Title|\n"
+        fail_string += f"|-----------|----------|-----|\n"
+
+        issue_list = self.build_issues_list(package_json, issue_flags)
+        for rd,rl,title in issue_list:
+            fail_string += f"|{rd}|{rl}|{title}|\n"
+
+        return fail_string if failed_flag else None
+
+    def build_issues_list(self, package_json, issue_flags: list):
+        issues = list()
+        pkg_issues = package_json.get("issues")
+        pkg_vulns = package_json.get("vulnerabilities")
+
+        if 'vul' in issue_flags:
+            for vuln in pkg_vulns:
+                risk_level = vuln.get("risk_level")
+                title = vuln.get("title")
+                issues.append(('VUL', risk_level,title))
+        #  if 'mal' in issue_flags:
+            #  for pkg_issue in pkg_issues:
+                #  if 'mal' in pkg_issue.get("risk_domain"):
+                    #  risk_level = pkg_issue.get("risk_level")
+                    #  title = pkg_issue.get("title")
+                    #  issues.append((risk_level,title))
+        #  if 'eng' in issue_flags:
+            #  for pkg_issue in pkg_issues:
+                #  if 'eng' in pkg_issue.get("risk_domain"):
+                    #  risk_level = pkg_issue.get("risk_level")
+                    #  title = pkg_issue.get("title")
+                    #  issues.append((risk_level,title))
+
+        for flag in issue_flags:
+            for pkg_issue in pkg_issues:
+                if flag in pkg_issue.get("risk_domain"):
+                    risk_domain = pkg_issue.get("risk_domain")
+                    risk_level = pkg_issue.get("risk_level")
+                    title = pkg_issue.get("title")
+                    issues.append((risk_domain, risk_level, title))
+
+        return issues
+
 
     def get_project_url(self, phylum_json):
         project_id = phylum_json.get("project")
