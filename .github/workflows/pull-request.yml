@@ -100,11 +100,11 @@ jobs:
           ret="${cat//'%'/'%25'}"
           ret="${cat//$'\n'/'%0A'}"
           ret="${cat//$'\r'/'%0A'}"
-        echo "::set-output name=ret::$ret"
+        echo "::set-output name=body::$ret"
 
       - name: print returncode
         run: |
-          echo "Returncode is ${{ steps.get-returncode.outputs.ret }}"
+          echo "Returncode is ${{ steps.get-returncode.outputs.body }}"
 
       - id: get-comment-body
         run: |
