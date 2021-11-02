@@ -102,9 +102,20 @@ jobs:
           ret="${ret//$'\r'/'%0A'}"
           echo "::set-output name=ret::$ret"
 
-      - name: print returncode
+      # - name: print returncode
+        # run: |
+          # echo "Returncode is ${{ steps.get-returncode.outputs.ret }}"
+
+      - name: return 5 for incomplete packages
+        if: "contains(steps.get-returncode.outputs.ret, '5')"
         run: |
-          echo "Returncode is ${{ steps.get-returncode.outputs.ret }}"
+          echo '5'
+          exit 5
+
+      - name: return 1 for incomplete packages
+        if: "contains(steps.get-returncode.outputs.ret, '1')"
+        run: |
+          echo '1'
 
       - id: get-comment-body
         run: |
