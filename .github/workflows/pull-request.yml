@@ -94,8 +94,17 @@ jobs:
         run: python analyze_updated_requirements_txt.py $GITHUB_REPOSITORY $PR_NUM $VUL $MAL $ENG $LIC $AUT
         # run: python analyze_updated_requirements_txt.py peterjmorgan phylum-demo $PR_NUM $VUL $MAL $ENG $LIC $AUT
 
-      - name: cat pr_comment.txt
-        run: cat ~/pr_comment.txt
+      - id: get-returncode
+        run: |
+          ret="$(cat ~/returncode.txt)"
+          ret="${cat//'%'/'%25'}"
+          ret="${cat//$'\n'/'%0A'}"
+          ret="${cat//$'\r'/'%0A'}"
+        echo "::set-output name=ret::$ret"
+
+      - name: print returncode
+        run: |
+          echo "Returncode is ${{ steps.get-returncode.outputs.ret }}"
 
       - id: get-comment-body
         run: |
