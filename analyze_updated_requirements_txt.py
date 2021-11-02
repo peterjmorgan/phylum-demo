@@ -190,7 +190,7 @@ class AnalyzePRForReqs():
                 print(line)
 
         header = "## Phylum OSS Supply Chain Risk Analysis\n\n"
-        header += "<details>\n<summary>Background</summary>\n<br />\nThis repository uses a GitHub Action to automatically analyze the risk of new dependencies added to requirements.txt via Pull Request. An administrator of this repository has set score requirements for Phylum's five risk domains.<br /><br />\nIf you see this comment, one or more dependencies added to the requirements.txt file in this Pull Request have failed Phylum's risk analysis.\n</details>\n"
+        header += "<details>\n<summary>Background</summary>\n<br />\nThis repository uses a GitHub Action to automatically analyze the risk of new dependencies added to requirements.txt via Pull Request. An administrator of this repository has set score requirements for Phylum's five risk domains.<br /><br />\nIf you see this comment, one or more dependencies added to the requirements.txt file in this Pull Request have failed Phylum's risk analysis.\n</details>\n\n"
 
         with open('/home/runner/pr_comment.txt','w') as outfile:
             outfile.write(header)
